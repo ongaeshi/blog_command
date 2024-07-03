@@ -1,0 +1,2 @@
+module BlogCommand
+end
