@@ -24,7 +24,14 @@ class Main < Thor
       `git diff --name-only origin/main..HEAD`.split("\n").each do |path|
         system("blogsync push #{path}")
       end
-    system("git push")
+      system("git push")
+    end
+  end
+
+  desc "pull", "Pull blog changes"
+  def pull
+    Dir.chdir(BLOG_REPOSITORY_DIR) do
+      system("blogsync pull ongaeshi.hatenablog.com")
     end
   end
 
