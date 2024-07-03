@@ -18,13 +18,14 @@ class Main < Thor
     system("code #{BLOG_REPOSITORY_DIR}")
   end
 
-  desc "push", "Push blog changes with blogsync and git"
+  desc "push", "Push blog changes"
   def push
     Dir.chdir(BLOG_REPOSITORY_DIR) do
-      `git diff --name-only origin/main..HEAD`.split("\n").each do |path|
+      list = `git diff --name-only`.split("\n")
+      list += `git diff --name-only origin/main..HEAD`.split("\n")
+      list.each do |path|
         system("blogsync push #{path}")
       end
-      system("git push")
     end
   end
 
