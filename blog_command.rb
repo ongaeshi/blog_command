@@ -14,7 +14,8 @@ class Main < Thor
       opts = []
       opts << "--title=\"#{options[:title]}\"" if options[:title]
       opts << "--draft" if options[:draft]
-      system("blogsync post --custom-path #{path } #{opts.join(" ")} ongaeshi.hatenablog.com")
+      system("blogsync post --custom-path #{path} #{opts.join(" ")} ongaeshi.hatenablog.com")
+      # TODO: 指定したパスがすでに存在していたときは _1.md みたいな名前になるので blogsync の標準出力から path を決定する
       system("git add ongaeshi.hatenablog.com/entry/#{path}.md")
       system("git commit -m \"Add #{path}\"") 
     end
@@ -25,7 +26,7 @@ class Main < Thor
     system("code #{BLOG_REPOSITORY_DIR}")
   end
 
-  desc "commit", "git commit and push blog changes"
+  desc "commit", "Push blog changes and git commit"
   method_option :message, type: :string, aliases: '-m'
   def commit
     Dir.chdir(BLOG_REPOSITORY_DIR) do
@@ -45,6 +46,9 @@ class Main < Thor
   def pull
     Dir.chdir(BLOG_REPOSITORY_DIR) do
       system("blogsync pull ongaeshi.hatenablog.com")
+
+      system("git add .")
+      system("git commit -m \"#{Pull blog changes}\"") 
     end
   end
 
