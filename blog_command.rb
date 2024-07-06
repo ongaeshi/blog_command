@@ -6,10 +6,17 @@ require 'open3'
 BLOG_REPOSITORY_DIR = File.join(ENV["HOME"], "Documents/blog")
 
 class Main < Thor
-  desc "new TITLE", "Create a new blog post with TITLE"
-  def new(title)
+  desc "new PATH", "Create a new blog post with PATH"
+  method_option :title, type: :string
+  method_option :draft, type: :boolean
+  def new(path)
     Dir.chdir(BLOG_REPOSITORY_DIR) do
-      system("blogsync post --draft --title=\"#{title}\" ongaeshi.hatenablog.com")
+      opts = []
+      opts << "--title=\"#{options[:title]}\"" if options[:title]
+      opts << "--draft" if options[:draft]
+      system("blogsync post --custom-path #{path } #{opts.join(" ")} ongaeshi.hatenablog.com")
+      system("git add ongaeshi.hatenablog.com/entry/#{path}.md")
+      system("git commit -m \"Add #{path}\"") 
     end
   end
 
