@@ -20,19 +20,24 @@ class Main < Thor
     end
   end
 
-  desc "edit", "Open the blog folder in VSCode"
+  desc "edit", "Open blog folder in editor"
   def edit
     system("code #{BLOG_REPOSITORY_DIR}")
   end
 
-  desc "push", "Push blog changes"
-  def push
+  desc "commit", "git commit and push blog changes"
+  method_option :message, type: :string, aliases: '-m'
+  def commit
     Dir.chdir(BLOG_REPOSITORY_DIR) do
       list = `git diff --name-only`.split("\n")
       list += `git diff --name-only origin/main..HEAD`.split("\n")
       list.each do |path|
         system("blogsync push #{path}")
       end
+
+      system("git add .")
+      message = options[:message] || "Commit blog changes"
+      system("git commit -m \"#{message}\"") 
     end
   end
 
@@ -46,6 +51,11 @@ class Main < Thor
   desc "open", "Open the blog page"
   def open
     system("explorer https://ongaeshi.hatenablog.com")
+  end
+
+  desc "manage", "Open the entries management screen"
+  def manage
+    system("explorer https://blog.hatena.ne.jp/tuto0621/ongaeshi.hatenablog.com/entries")
   end
 end
 
