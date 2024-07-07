@@ -13,11 +13,16 @@ class Main < Thor
     Dir.chdir(BLOG_REPOSITORY_DIR) do
       opts = []
       opts << "--title=\"#{options[:title]}\"" if options[:title]
-      opts << "--draft" if options[:draft]
-      system("blogsync post --custom-path #{path} #{opts.join(" ")} ongaeshi.hatenablog.com")
-      # TODO: 指定したパスがすでに存在していたときは _1.md みたいな名前になるので blogsync の標準出力から path を決定する
-      system("git add ongaeshi.hatenablog.com/entry/#{path}.md")
-      system("git commit -m \"Add #{path}\"") 
+      cmd = "blogsync post --draft --custom-path #{path} #{opts.join(' ')} ongaeshi.hatenablog.com"
+      _, stderr, _ = Open3.capture3(cmd, stdin_data: "")
+      STDERR.puts stderr
+      new_file_path = stderr.split("\n").select { |line| line.strip.start_with?("store") }.map do |line|
+        line.strip.sub("store ", "")
+      end.first
+      # Draft: true の行を削除したい
+      str = File.read(new_file_path)
+      puts str
+      File.write(new_file_path, str.split("\n").map { |l| l.gsub(/^Draft: true/, "") }.join("\n"))
     end
   end
 
