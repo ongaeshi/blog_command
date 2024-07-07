@@ -25,7 +25,8 @@ class Main < Thor
   method_option :message, type: :string, aliases: '-m'
   def commit
     Dir.chdir(BLOG_REPOSITORY_DIR) do
-      list = `git diff --name-only`.split("\n")
+      list = `git status --porcelain`.split("\n").map { |s| s.split[1] }
+      list += `git diff --name-only`.split("\n")
       list += `git diff --name-only origin/main..HEAD`.split("\n")
       list.each do |path|
         system("blogsync push #{path}")
