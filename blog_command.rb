@@ -8,21 +8,11 @@ BLOG_REPOSITORY_DIR = File.join(ENV["HOME"], "Documents/blog")
 class Main < Thor
   desc "new PATH", "Create a new blog post with PATH"
   method_option :title, type: :string
-  method_option :draft, type: :boolean
   def new(path)
     Dir.chdir(BLOG_REPOSITORY_DIR) do
       opts = []
       opts << "--title=\"#{options[:title]}\"" if options[:title]
-      cmd = "blogsync post --draft --custom-path #{path} #{opts.join(' ')} ongaeshi.hatenablog.com"
-      _, stderr, _ = Open3.capture3(cmd, stdin_data: "")
-      STDERR.puts stderr
-      new_file_path = stderr.split("\n").select { |line| line.strip.start_with?("store") }.map do |line|
-        line.strip.sub("store ", "")
-      end.first
-      # Draft: true の行を削除したい
-      str = File.read(new_file_path)
-      puts str
-      File.write(new_file_path, str.split("\n").map { |l| l.gsub(/^Draft: true/, "") }.join("\n"))
+      system("blogsync post --custom-path #{path} --draft #{opts.join(" ")} ongaeshi.hatenablog.com", in: IO::NULL)
     end
   end
 
